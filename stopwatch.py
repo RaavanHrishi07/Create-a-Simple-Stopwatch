@@ -44,6 +44,7 @@ class Stopwatch:
             button_frame,
             text="Reset",
             width=7,
+            state=tk.DISABLED,
             command=self.reset
         )
         self.reset_button.pack(side=tk.LEFT, padx=3)
@@ -57,6 +58,7 @@ class Stopwatch:
 
         self.start_button.config(state=tk.DISABLED)
         self.stop_button.config(state=tk.NORMAL)
+        self.reset_button.config(state=tk.NORMAL)
 
         self.update_display()
 
@@ -80,6 +82,7 @@ class Stopwatch:
         self.time_label.config(text="00:00:00")
         self.start_button.config(state=tk.NORMAL)
         self.stop_button.config(state=tk.DISABLED)
+        self.reset_button.config(state=tk.DISABLED)
 
     def update_display(self):
         if not self.running:
