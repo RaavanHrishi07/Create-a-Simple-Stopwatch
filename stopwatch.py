@@ -2,15 +2,51 @@ import time
 import tkinter as tk
 
 
+class StopwatchTimer:
+    """Handle stopwatch timing independently from the GUI."""
+
+    def __init__(self):
+        self.start_time = None
+        self.elapsed_time = 0.0
+        self.running = False
+
+    def start(self):
+        """Start or resume the stopwatch."""
+        if self.running:
+            return
+
+        self.start_time = time.monotonic() - self.elapsed_time
+        self.running = True
+
+    def stop(self):
+        """Pause the stopwatch and preserve elapsed time."""
+        if not self.running:
+            return
+
+        self.elapsed_time = time.monotonic() - self.start_time
+        self.running = False
+
+    def reset(self):
+        """Reset the stopwatch to zero."""
+        self.start_time = None
+        self.elapsed_time = 0.0
+        self.running = False
+
+    def get_elapsed_time(self):
+        """Return the current elapsed time in seconds."""
+        if self.running:
+            return time.monotonic() - self.start_time
+
+        return self.elapsed_time
+
+
 class Stopwatch:
     def __init__(self, root):
         self.root = root
         self.root.title("Stopwatch")
         self.root.resizable(False, False)
 
-        self.start_time = None
-        self.elapsed_time = 0.0
-        self.running = False
+        self.timer = StopwatchTimer()
 
         self.time_label = tk.Label(
             root,
@@ -50,11 +86,8 @@ class Stopwatch:
         self.reset_button.pack(side=tk.LEFT, padx=3)
 
     def start(self):
-        if self.running:
-            return
-
-        self.start_time = time.monotonic() - self.elapsed_time
-        self.running = True
+        """Start or resume the stopwatch."""
+        self.timer.start()
 
         self.start_button.config(state=tk.DISABLED)
         self.stop_button.config(state=tk.NORMAL)
@@ -63,11 +96,8 @@ class Stopwatch:
         self.update_display()
 
     def stop(self):
-        if not self.running:
-            return
-
-        self.elapsed_time = time.monotonic() - self.start_time
-        self.running = False
+        """Pause the stopwatch."""
+        self.timer.stop()
 
         self.start_button.config(state=tk.NORMAL)
         self.stop_button.config(state=tk.DISABLED)
@@ -75,9 +105,8 @@ class Stopwatch:
         self.update_display()
 
     def reset(self):
-        self.running = False
-        self.start_time = None
-        self.elapsed_time = 0.0
+        """Reset the stopwatch and update the display."""
+        self.timer.reset()
 
         self.time_label.config(text="00:00:00")
         self.start_button.config(state=tk.NORMAL)
@@ -85,12 +114,11 @@ class Stopwatch:
         self.reset_button.config(state=tk.DISABLED)
 
     def update_display(self):
-        if not self.running:
+        """Update the displayed elapsed time."""
+        if not self.timer.running:
             return
 
-        self.elapsed_time = time.monotonic() - self.start_time
-
-        total_seconds = int(self.elapsed_time)
+        total_seconds = int(self.timer.get_elapsed_time())
         hours, remainder = divmod(total_seconds, 3600)
         minutes, seconds = divmod(remainder, 60)
 
